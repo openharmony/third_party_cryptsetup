@@ -55,6 +55,15 @@ class EditorError(Exception):
     return self.reason
 
 
+class PullRequestError(Exception):
+  """ pull request to Gitee did not succeed.
+  """
+  def __init__(self, reason):
+    self.reason = reason
+  
+  def __str__(self):
+    return self.reason
+
 class GitError(Exception):
   """Unspecified internal error from git.
   """

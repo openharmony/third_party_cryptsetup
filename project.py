@@ -1350,6 +1350,121 @@ class Project(object):
       if rb.commits:
         return rb
     return None
+  
+  def  UploadNoReview(self, opt, peoples, branch=None):
+    """If not review server defined, uploads the named branch directly to git server.
+    """
+    if branch is None:
+      branch = self.CurrentBranch
+    if branch is None:
+      raise GitError('not currently on a branch')
+
+    branch = self.GetBranch(branch)
+
+    if not branch.LocalMerge:
+      raise GitError('branch %s does not track a remote' % branch.name)
+
+    if not opt.ignore_review and branch.remote.review:
+      raise GitError('remote %s has review url, use `repo upload` instead.' % branch.remote.name)
+
+    if opt.new_branch:
+      dest_branch = branch.name
+    else:
+      dest_branch = branch.merge
+
+    if dest_branch.startswith(R_TAGS):
+      raise GitError('Can not push to TAGS (%s)! Run repo push with --new flag to create new feature branch.' % dest_branch)
+    if not dest_branch.startswith(R_HEADS):
+      dest_branch = R_HEADS + dest_branch
+
+    if not branch.remote.projectname:
+      branch.remote.projectname = self.name
+      branch.remote.Save()
+
+    # save git config branch.name.merge
+    if opt.new_branch:
+      branch.merge = dest_branch
+      branch.Save()
+
+    ref_spec = '%s:%s' % (R_HEADS + branch.name, dest_branch)
+    pushurl = self.manifest.manifestProject.config.GetString('repo.%s.pushurl'
+              % branch.remote.name)
+    if not pushurl:
+      pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
+    if not pushurl:
+      pushurl = branch.remote.name
+    else:
+      pushurl = pushurl.rstrip('/') + '/' + self.name
+      remote = self.manifest.remotes.get(branch.remote.name)
+      if remote and remote.autodotgit is not False:
+        pushurl += ".git"
+
+    cmd = ['push']
+    if opt.force:
+      cmd.append('--force')
+    cmd.append(pushurl)
+    cmd.append(ref_spec)
+
+    if GitCommand(self, cmd).Wait() != 0:
+      raise UploadError('Upload failed')
+
+    if branch.LocalMerge and branch.LocalMerge.startswith('refs/remotes'):
+      self.bare_git.UpdateRef(branch.LocalMerge,
+                              R_HEADS + branch.name)
+  
+    def PullRequest(self, opt, branch, peoples):
+    """example test
+    curl -X POST --header 'Content-Type: application/json;charset=UTF-8' 
+    'https://gitee.com/api/v5/repos/MarineJ/AS-Test/pulls' 
+    -d '{"access_token":"token",
+    "title":"test_repo","head":"repo_test","base":"master"}'
+    use remote.url to generate post_url
+    """
+    if opt.dest_branch:
+      base_branch = opt.dest_branch
+    elif self.revisionExpr:
+      base_branch = self.revisionExpr
+      print("project revisionExpr %s" % self.revisionExpr)
+    else:
+      print("default revisionExpr %s" % self.manifest.default.revisionExpr)
+      base_branch = self.manifest.default.revisionExpr
+    # print("your config reviewers are: %s" % peoples)
+    gitee_url = 'https://gitee.com/api/v5/repos/'
+    namespace = self._GiteeNamespace()
+    token = self.manifest.manifestProject.config.GetString('repo.token')
+    if not token:
+      raise PullRequestError('repo.token is None, Please set it before pushing, you need `repo config -h`')
+    post_url = gitee_url + namespace + '/' + self.name + '/' + 'pulls'
+
+    payload = {"access_token": token, "title": 'Gitee Review - {}'.format(branch), "head": branch,
+               "base": base_branch, "assignees": ','.join(peoples)}
+    r = requests.post(post_url, json=payload)
+    r_j = r.json()
+    if r.status_code != 201:
+      error_message = r_j['message']
+      raise PullRequestError('pull request %s  code :%s  error: %s' %
+                             (post_url, r.status_code, error_message))
+    elif r_j['html_url']:
+        return r_j['html_url']
+
+  # print('pull request %s  code :%s \n' %(post_url, r.status_code))
+  # print('project: %s head: %s' %(branch.project.name, branch.name))
+
+  def _GiteeNamespace(self):
+    """
+    GET remote_url namespace
+    """
+    regex1 = r'^git@gitee.com:(.*?)/.*'
+    regex2 = r'^https://gitee.com/(.*?)/.*'
+    name1 = re.match(regex1, self.remote.url)
+    name2 = re.match(regex2, self.remote.url)
+    if name1:
+      return name1.group(1)
+    elif name2:
+      return name2.group(1)
+    else:
+      # print("remote.url: %s doesn't belong to gitee" % self.remote.url)
+      raise PullRequestError("remote.url: %s doesn't belong to gitee" % self.remote.url)
 
   def UploadForReview(self, branch=None,
                       people=([], []),
