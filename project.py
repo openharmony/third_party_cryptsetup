@@ -30,6 +30,7 @@ import tarfile
 import tempfile
 import time
 import traceback
+import requests
 
 from color import Coloring
 from git_command import GitCommand, git_require
