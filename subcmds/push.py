@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2010 JiangXin@ossxp.com
 #
@@ -22,24 +23,30 @@ from editor import Editor
 from error import UploadError, GitError, PullRequestError
 from project import ReviewableBranch
 
+from pyversion import is_python3
+if not is_python3():
+  input = raw_input  # noqa: F821
+else:
+  unicode = str
+
 def _ConfirmManyUploads(multiple_branches=False):
   if multiple_branches:
-    print "ATTENTION: One or more branches has an unusually high number of commits."
+    print("ATTENTION: One or more branches has an unusually high number of commits.")
   else:
-    print "ATTENTION: You are uploading an unusually high number of commits."
-  print "YOU PROBABLY DO NOT MEAN TO DO THIS. (Did you rebase across branches?)"
-  answer = raw_input("If you are sure you intend to do this, type 'yes': ").strip()
+    print("ATTENTION: You are uploading an unusually high number of commits.")
+  print("YOU PROBABLY DO NOT MEAN TO DO THIS. (Did you rebase across branches?)")
+  answer = input("If you are sure you intend to do this, type 'yes': ").strip()
   return answer == "yes"
 
 def _die(fmt, *args):
   msg = fmt % args
-  print >>sys.stderr, 'error: %s' % msg
+  print('error: %s' % msg, file=sys.stderr)
   sys.exit(1)
 
 def _SplitUsers(values):
   result = []
-  for str in values:
-    result.extend([s.strip() for s in str.split(',')])
+  for value in values:
+    result.extend([s.strip() for s in value.split(',')])
   return result
 
 class Push(InteractiveCommand):
@@ -154,14 +161,14 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
       date = branch.date
       list = branch.commits
 
-      print 'Upload project %s/:' % project.relpath
-      print '  branch %s (%2d commit%s, %s):' % (
+      print('Upload project %s/:' % project.relpath)
+      print('  branch %s (%2d commit%s, %s):' % (
                     name,
                     len(list),
                     len(list) != 1 and 's' or '',
-                    date)
+                    date))
       for commit in list:
-        print '         %s' % commit
+        print( '         %s' % commit)
 
       pushurl = project.manifest.manifestProject.config.GetString('repo.pushurl')
       sys.stdout.write('to %s (y/n)? ' % (pushurl and 'server: ' + pushurl or 'remote') )
@@ -251,7 +258,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
                 sys.stdout.write('Uncommitted changes in ' + branch.project.name + ' (did you forget to amend?). Continue uploading? (y/n) ')
                 a = sys.stdin.readline().strip().lower()
                 if a not in ('y', 'yes', 't', 'true', 'on'):
-                    print >>sys.stderr, "skipping upload"
+                    print("skipping upload", file=sys.stderr)
                     branch.uploaded = False
                     branch.error = 'User aborted'
                     continue
@@ -263,14 +270,14 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
             have_pr = True
             branch.pr_url = branch.project.PullRequest(opt, branch.name, peoples)
             branch.pull_requested = True
-      except UploadError, e:
+      except UploadError as e:
         branch.error = e
         branch.uploaded = False
         have_errors = True
-      except GitError, e:
-        print >>sys.stderr, "Error: "+ str(e)
+      except GitError as e:
+        print("Error: "+ str(e), file=sys.stderr)
         sys.exit(1)
-      except PullRequestError, e:
+      except PullRequestError as e:
         branch.pr_error = e
         branch.pull_requested = False
         have_errors = True
@@ -278,35 +285,48 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
 
 
 
-    print >>sys.stderr, ''
-    print >>sys.stderr, '----------------------------------------------------------------------'
+    print(file=sys.stderr)
+    print('----------------------------------------------------------------------', file=sys.stderr)
 
     if have_errors:
       for branch in todo:
         if not branch.uploaded:
-          print >>sys.stderr, '[PUSH FAILED] %-15s %-15s  (%s)' % (
-                 branch.project.relpath + '/', \
-                 branch.name, \
-                 branch.error)
+          if len(str(branch.error)) <= 30:
+            fmt = ' (%s)'
+          else:
+            fmt = '\n       (%s)'
+          print(('[PUSH  FAILED] %-15s %-15s' + fmt) % (
+              branch.project.relpath + '/',
+              branch.name,
+              str(branch.error)),
+              file=sys.stderr)
         if have_pr_errors:
             if not branch.pull_requested:
-              print >>sys.stderr, '[PR   FAILED] %-15s %-15s  (%s)' % (
-                     branch.project.relpath + '/', \
-                     branch.name, \
-                     branch.pr_error)
-      print >>sys.stderr, "'If your PR FAILED ,`repo push` Again to create PR after handling the error'"
-      print >>sys.stderr, ''
+              if len(str(branch.error)) <= 30:
+                fmt = ' (%s)'
+              else:
+                fmt = '\n       (%s)'
+              print(('[PR   FAILED] %-15s %-15s' + fmt) % (
+                     branch.project.relpath + '/',
+                     branch.name,
+                     str(branch.pr_error)),
+                     file=sys.stderr)
+
+      print("'if your PR FAILED ,`repo push` again to create PR after handling the error'", file=sys.stderr)
+      print()
 
     for branch in todo:
         if branch.uploaded:
-          print >>sys.stderr, '[PUSH     OK] %-15s %s ' % (
+          print(sys.stderr, '[PUSH     OK] %-15s %s ' % (
                  branch.project.relpath + '/',
-                 branch.name)
+                 branch.name),
+                 file=sys.stderr)
         if have_pr:
             if branch.pull_requested:
-              print >>sys.stderr, '[PR       OK] %-15s %s pr_url: %s' % (
+              print(sys.stderr, '[PR       OK] %-15s %s pr_url: %s' % (
                      branch.project.relpath + '/',
-                     branch.name, branch.pr_url)
+                     branch.name, branch.pr_url),
+                     file=sys.stderr)
 
     if have_errors:
       sys.exit(1)
@@ -324,8 +344,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
 
     if opt.force:
       if len(project_list) != 1:
-        print >>sys.stderr, \
-              'error: --force requires exactly one project'
+        print('error: --force requires exactly one project', file=sys.stderr)
         sys.exit(1)
 
     # if not create new branch, check whether branch has new commit.
@@ -354,7 +373,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
       reviewers = _SplitUsers(opt.reviewers)
     # run git push
     if not pending:
-      print >>sys.stdout, "no branches ready for upload"
+      print("no branches ready for upload", file=sys.stderr)
     elif len(pending) == 1 and len(pending[0][1]) == 1:
       self._SingleBranch(opt, pending[0][1][0], reviewers)
     else:
