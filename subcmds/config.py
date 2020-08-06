@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 #
 # Copyright (C) 2010 JiangXin@ossxp.com
 #
@@ -38,11 +39,11 @@ class Config(Command):
       self.Usage()
 
     if len(args) > 1 and not args[0].startswith ('repo.'):
-      print >>sys.stderr, "error: can only set config name starts with 'repo.', but you provide '%s'." % args[0]
+      print("error: can only set config name starts with 'repo.', but you provide '%s'." % args[0], file=sys.stderr)
       sys.exit(1)
 
     if len(args) > 1 and args[0] == 'repo.mirror':
-      print >>sys.stderr, "fatal: reset repo.mirror is not supported on existing client."
+      print("fatal: reset repo.mirror is not supported on existing client.", file=sys.stderr)
       sys.exit(1)
 
     mp = self.manifest.manifestProject
