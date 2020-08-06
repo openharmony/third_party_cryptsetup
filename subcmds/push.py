@@ -345,9 +345,10 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
           if (not opt.new_branch and
               project.GetUploadableBranch(project.CurrentBranch) is None):
             continue
-          branch = project.GetBranch(project.CurrentBranch)
-          rb = ReviewableBranch(project, branch, branch.LocalMerge)
-          pending.append((project, [rb]))
+          if project.CurrentBranch:
+            branch = project.GetBranch(project.CurrentBranch)
+            rb = ReviewableBranch(project, branch, branch.LocalMerge)
+            pending.append((project, [rb]))
 
     if opt.reviewers:
       reviewers = _SplitUsers(opt.reviewers)
