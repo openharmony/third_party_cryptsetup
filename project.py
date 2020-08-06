@@ -35,7 +35,7 @@ from color import Coloring
 from git_command import GitCommand, git_require
 from git_config import GitConfig, IsId, GetSchemeFromUrl, GetUrlCookieFile, \
     ID_RE
-from error import GitError, HookError, UploadError, DownloadError
+from error import GitError, HookError, UploadError, DownloadError, PullRequestError
 from error import ManifestInvalidRevisionError, ManifestInvalidPathError
 from error import NoManifestException
 import platform_utils
