@@ -1412,7 +1412,7 @@ class Project(object):
       self.bare_git.UpdateRef(branch.LocalMerge,
                               R_HEADS + branch.name)
   
-    def PullRequest(self, opt, branch, peoples):
+  def PullRequest(self, opt, branch, peoples):
     """example test
     curl -X POST --header 'Content-Type: application/json;charset=UTF-8' 
     'https://gitee.com/api/v5/repos/MarineJ/AS-Test/pulls' 
