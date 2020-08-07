@@ -302,7 +302,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
               file=sys.stderr)
         if have_pr_errors:
             if not branch.pull_requested:
-              if len(str(branch.error)) <= 30:
+              if len(str(branch.pr_error)) <= 30:
                 fmt = ' (%s)'
               else:
                 fmt = '\n       (%s)'
