@@ -22,7 +22,7 @@ from error import GitError
 
 
 class GiteePr(Command):
-  common = False
+  common = True
   helpSummary = "Show gitee pull request list"
   helpUsage = """
 %prog [--build] [<project>...]
@@ -46,6 +46,7 @@ class GiteePr(Command):
       project:name
       project_pr:
         branch of current_branch:[{
+        }]
       },{},{}]
       """
       result = []
@@ -57,26 +58,51 @@ class GiteePr(Command):
              base_branch = project.manifest.default.revisionExpr
           project_name = project.name
           branch_name = project.CurrentBranch
+
+          if not branch_name:
+              sys.stderr.write('CurrentBranch is None, Please set it, you need `repo start -h`')
+              sys.exit(1)
           name_space = project._GiteeNamespace()
           token = self.manifest.manifestProject.config.GetString('repo.token')
+
           if not token:
-              sys.stderr.write('WARN: repo.token is None, Please set it, you need `repo config -h`')
-          p_list = {'project_name': project_name, 'branch_name': branch_name, 'name_space': name_space}
-          url = 'https://gitee.com/api/v5/repos/{0}/{1}/pulls'.format(name_space, project_name)
-          payload = {'base': base_branch, 'head': branch_name, 'page': 0, 'access_token': token}
+              sys.stderr.write('repo.token is None, Please set it, you need `repo config -h`')
+              sys.exit(1)
+          p_list = {'project_name': project_name, 'base': base_branch, 'head': branch_name}
+          url = 'https://gitee.com/api/v5/repos/%s/%s/pulls' % (name_space, project_name)
+          payload = {'base': base_branch, 'head': branch_name, 'page': 0, 'access_token': token, 'state': 'open'}
           try:
-              r = requests.get(url, params=payload)
-              p_list['pull_request'] = [tmp['html_url'] for tmp in r.json()]
-              total_page = int(r.headers['total_page'])
-              for page in range(2, total_page+1):
-                  payload['page'] = int(page)
-                  r = requests.get(url, params=payload)
-                  p_list['pull_request'].extend([tmp['html_url'] for tmp in r.json()])
+              r = requests.get(url, params=payload, timeout=5)
+              pr_url = [tmp['html_url'] for tmp in r.json()]
+              p_list['pull_request'] = pr_url if pr_url else ['']
+              # total_page = int(r.headers['total_page'])
+              # for page in range(2, total_page+1):
+              #     payload['page'] = int(page)
+              #     r = requests.get(url, params=payload)
+              #     p_list['pull_request'].extend([tmp['html_url'] for tmp in r.json()])
               result.append(p_list)
           except Exception as e:
-              sys.stderr.write(e)
+              sys.stderr.write('ERROR: %s' % e)
+              sys.exit(1)
+      if opt.build:
+          hook_url = self.manifest.manifestProject.config.GetString('repo.hook')
+          if not hook_url:
+              sys.stderr.write('repo.hook is None, Please set it, you need `repo config -h`')
+              sys.exit(1)
+          try:
+              response = requests.post(hook_url, json=json.dumps(result), timeout=5)
+          except Exception as e:
+              sys.stderr.write('POST HOOK ERROR: %s' % e)
+              sys.exit(1)
+          print('POST HOOK SUCCESS')
+          print('STATUS: %s' % response.status_code)
+          print('BODY: %s' % response.content)
+
+
+
+
       for project in result:
-          print('{0}        {1} pr_url: {2}'.format(project['project_name'], project['branch_name'], ' '.join(project['pull_request'])))
+          print('%s        %s pr_url: %s' % (project['project_name'], project['head'], project['pull_request'][0]))
 
 
 
