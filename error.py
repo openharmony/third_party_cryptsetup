@@ -59,6 +59,7 @@ class PullRequestError(Exception):
   """ pull request to Gitee did not succeed.
   """
   def __init__(self, reason):
+    super.__init__()
     self.reason = reason
   
   def __str__(self):
