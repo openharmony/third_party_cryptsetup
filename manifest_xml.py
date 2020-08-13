@@ -162,7 +162,8 @@ class _XmlRemote(object):
     # * no scheme in the base url, like <hostname:port>
     # We handle no scheme by replacing it with an obscure protocol, gopher
     # and then replacing it with the original when we are done.
-
+    if 'git@gitee' in url:
+      return url
     if manifestUrl.find(':') != manifestUrl.find('/') - 1:
       url = urllib.parse.urljoin('gopher://' + manifestUrl, url)
       url = re.sub(r'^gopher://', '', url)
