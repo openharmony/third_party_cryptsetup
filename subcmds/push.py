@@ -317,13 +317,13 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
 
     for branch in todo:
         if branch.uploaded:
-          print(sys.stderr, '[PUSH     OK] %-15s %s ' % (
+          print('[PUSH     OK] %-15s %s ' % (
                  branch.project.relpath + '/',
                  branch.name),
                  file=sys.stderr)
         if have_pr:
             if branch.pull_requested:
-              print(sys.stderr, '[PR       OK] %-15s %s pr_url: %s' % (
+              print('[PR       OK] %-15s %s pr_url: %s' % (
                      branch.project.relpath + '/',
                      branch.name, branch.pr_url),
                      file=sys.stderr)
