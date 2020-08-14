@@ -244,9 +244,9 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
 
   def _UploadAndReport(self, opt, todo, peoples):
     have_errors = False
-    have_pr_errors = False
-    have_pr = False
     for branch in todo:
+      branch.have_pr_errors = False
+      branch.have_pr = False
       try:
         # Check if there are local changes that may have been forgotten
         if branch.project.HasChanges():
@@ -262,12 +262,11 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
                     branch.uploaded = False
                     branch.error = 'User aborted'
                     continue
-
         branch.project.UploadNoReview(opt, peoples, branch=branch.name)
         branch.uploaded = True
         pull_request = self.manifest.manifestProject.config.GetString('repo.pullrequest')
         if not (pull_request and pull_request == 'False') or opt.pr_force:
-            have_pr = True
+            branch.have_pr = True
             branch.pr_url = branch.project.PullRequest(opt, branch.name, peoples)
             branch.pull_requested = True
       except UploadError as e:
@@ -281,7 +280,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
         branch.pr_error = e
         branch.pull_requested = False
         have_errors = True
-        have_pr_errors = True
+        branch.have_pr_errors = True
 
 
 
@@ -300,7 +299,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
               branch.name,
               str(branch.error)),
               file=sys.stderr)
-        if have_pr_errors:
+        if branch.have_pr_errors:
             if not branch.pull_requested:
               if len(str(branch.pr_error)) <= 30:
                 fmt = ' (%s)'
@@ -321,7 +320,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
                  branch.project.relpath + '/',
                  branch.name),
                  file=sys.stderr)
-        if have_pr:
+        if branch.have_pr:
             if branch.pull_requested:
               print('[PR       OK] %-15s %s pr_url: %s' % (
                      branch.project.relpath + '/',
