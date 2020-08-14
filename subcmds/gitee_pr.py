@@ -60,13 +60,13 @@ class GiteePr(Command):
           branch_name = project.CurrentBranch
 
           if not branch_name:
-              sys.stderr.write('CurrentBranch is None, Please set it, you need `repo start -h`')
+              sys.stderr.write('CurrentBranch is None, Please set it, you need `repo start -h`\n')
               sys.exit(1)
           name_space = project._GiteeNamespace()
           token = self.manifest.manifestProject.config.GetString('repo.token')
 
           if not token:
-              sys.stderr.write('repo.token is None, Please set it, you need `repo config -h`')
+              sys.stderr.write('repo.token is None, Please set it, you need `repo config -h`\n')
               sys.exit(1)
           p_list = {'project_name': project_name, 'base': base_branch, 'head': branch_name}
           url = 'https://gitee.com/api/v5/repos/%s/%s/pulls' % (name_space, project_name)
@@ -82,17 +82,17 @@ class GiteePr(Command):
               #     p_list['pull_request'].extend([tmp['html_url'] for tmp in r.json()])
               result.append(p_list)
           except Exception as e:
-              sys.stderr.write('ERROR: %s' % e)
+              sys.stderr.write('ERROR: %s\n' % e)
               sys.exit(1)
       if opt.build:
           hook_url = self.manifest.manifestProject.config.GetString('repo.hook')
           if not hook_url:
-              sys.stderr.write('repo.hook is None, Please set it, you need `repo config -h`')
+              sys.stderr.write('repo.hook is None, Please set it, you need `repo config -h`\n')
               sys.exit(1)
           try:
               response = requests.post(hook_url, json=json.dumps(result), timeout=5)
           except Exception as e:
-              sys.stderr.write('POST HOOK ERROR: %s' % e)
+              sys.stderr.write('POST HOOK ERROR: %s\n' % e)
               sys.exit(1)
           print('POST HOOK SUCCESS')
           print('STATUS: %s' % response.status_code)
