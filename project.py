@@ -1365,8 +1365,8 @@ class Project(object):
     if not branch.LocalMerge:
       raise GitError('branch %s does not track a remote' % branch.name)
 
-    if not opt.ignore_review and branch.remote.review:
-      raise GitError('remote %s has review url, use `repo upload` instead.' % branch.remote.name)
+    # if not opt.ignore_review and branch.remote.review:
+    #   raise GitError('remote %s has review url, use `repo upload` instead or use `repo push --`.' % branch.remote.name)
 
     if opt.new_branch:
       dest_branch = branch.name

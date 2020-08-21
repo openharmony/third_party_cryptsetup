@@ -25,13 +25,13 @@ class GiteePr(Command):
   common = True
   helpSummary = "Show gitee pull request list"
   helpUsage = """
-%prog [--build] [<project>...]
+%prog [<project>...]
 """
 
-  def _Options(self, p):
-    p.add_option('--build',
-                 dest='build', action='store_true',
-                 help="To trigger ci with repo's config hook")
+  # def _Options(self, p):
+  #   p.add_option('--build',
+  #                dest='build', action='store_true',
+  #                help="To trigger ci with repo's config hook")
 
   def Execute(self, opt, args):
       """
@@ -84,19 +84,19 @@ class GiteePr(Command):
           except Exception as e:
               sys.stderr.write('ERROR: %s\n' % e)
               sys.exit(1)
-      if opt.build:
-          hook_url = self.manifest.manifestProject.config.GetString('repo.hook')
-          if not hook_url:
-              sys.stderr.write('repo.hook is None, Please set it, you need `repo config -h`\n')
-              sys.exit(1)
-          try:
-              response = requests.post(hook_url, json=json.dumps(result), timeout=5)
-          except Exception as e:
-              sys.stderr.write('POST HOOK ERROR: %s\n' % e)
-              sys.exit(1)
-          print('POST HOOK SUCCESS')
-          print('STATUS: %s' % response.status_code)
-          print('BODY: %s' % response.content)
+      # if opt.build:
+      #     hook_url = self.manifest.manifestProject.config.GetString('repo.hook')
+      #     if not hook_url:
+      #         sys.stderr.write('repo.hook is None, Please set it, you need `repo config -h`\n')
+      #         sys.exit(1)
+      #     try:
+      #         response = requests.post(hook_url, json=json.dumps(result), timeout=5)
+      #     except Exception as e:
+      #         sys.stderr.write('POST HOOK ERROR: %s\n' % e)
+      #         sys.exit(1)
+      #     print('POST HOOK SUCCESS')
+      #     print('STATUS: %s' % response.status_code)
+      #     print('BODY: %s' % response.content)
 
 
 

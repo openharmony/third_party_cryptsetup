@@ -142,9 +142,9 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
     p.add_option('--br',
                  type='string', action='store', dest='branch',
                  help='branch to push.')
-    p.add_option('--ignore_review',
-                 dest='ignore_review', action='store_true',
-                 help='run even has review defined.')
+    # p.add_option('--ignore_review',
+    #              dest='ignore_review', action='store_true',
+    #              help='run even has review defined.')
 
   def _SingleBranch(self, opt, branch, peoples):
     project = branch.project
