@@ -1451,6 +1451,24 @@ class Project(object):
   # print('pull request %s  code :%s \n' %(post_url, r.status_code))
   # print('project: %s head: %s' %(branch.project.name, branch.name))
 
+  def ForkProject(self, token):
+    """
+    1.确认用户信息
+    2.进行仓库的fork动作
+    :return: fork_status
+    """
+    # if user_info_local:
+    #     fork
+    # else:
+    # use open_api get namespace
+    gitee_url = 'https://gitee.com/api/v5/repos'
+    namespace = self._GiteeNamespace()
+    post_url = '/'.join([gitee_url, namespace, self.name, 'forks'])
+    payload = {"access_token": token}
+    r = requests.post(post_url, json=payload)
+    # check r.msg
+    return r.status_code
+
   def _GiteeNamespace(self):
     """
     GET remote_url namespace

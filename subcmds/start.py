@@ -66,6 +66,7 @@ revision specified in the manifest.
     all_projects = self.GetProjects(projects,
                                     missing_ok=bool(self.gitc_manifest))
 
+
     # This must happen after we find all_projects, since GetProjects may need
     # the local directory, which will disappear once we save the GITC manifest.
     if self.gitc_manifest:
@@ -86,6 +87,18 @@ revision specified in the manifest.
         os.chdir(self.manifest.topdir)
 
     pm = Progress('Starting %s' % nb, len(all_projects))
+
+    if not opt.all:
+      fork_success_count = 0
+      token = self.manifest.manifestProject.config.GetString('repo.token')
+      for project in all_projects:
+        status_code = project.ForkProject(token)
+        if status_code == 201:
+          fork_success_count += 1
+      print("fork_success: {}".format(fork_success_count))
+
+
+      # 展示fork状态，失败、成功、已存在
     for project in all_projects:
       pm.update()
 
