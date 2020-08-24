@@ -1436,8 +1436,12 @@ class Project(object):
     if not token:
       raise PullRequestError('repo.token is None, Please set it before pushing, you need `repo config -h`')
     post_url = gitee_url + namespace + '/' + self.name + '/' + 'pulls'
-
-    payload = {"access_token": token, "title": 'Gitee Review - {}'.format(branch), "head": branch,
+    pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
+    if not pushurl:
+      head = branch
+    else:
+      head = ':'.join([self._GiteeNamespace(pushurl), branch])
+    payload = {"access_token": token, "title": 'Gitee Review - {}'.format(branch), "head": head,
                "base": base_branch, "assignees": ','.join(peoples)}
     r = requests.post(post_url, json=payload)
     r_j = r.json()
@@ -1469,14 +1473,15 @@ class Project(object):
     # check r.msg
     return r.status_code
 
-  def _GiteeNamespace(self):
+  def _GiteeNamespace(self, url=None):
     """
     GET remote_url namespace
     """
+    check_url = url if url is not None else self.remote.url
     regex1 = r'^git@gitee.com:(.*?)/.*'
     regex2 = r'^https://gitee.com/(.*?)/.*'
-    name1 = re.match(regex1, self.remote.url)
-    name2 = re.match(regex2, self.remote.url)
+    name1 = re.match(regex1, check_url)
+    name2 = re.match(regex2, check_url)
     if name1:
       return name1.group(1)
     elif name2:
