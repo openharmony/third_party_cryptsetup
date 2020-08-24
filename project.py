@@ -1434,7 +1434,9 @@ class Project(object):
     namespace = self._GiteeNamespace()
     token = self.manifest.manifestProject.config.GetString('repo.token')
     if not token:
-      raise PullRequestError('repo.token is None, Please set it before pushing, you need `repo config -h`')
+      token = GitConfig.ForUser().GetString('repo.token')
+      if not token:
+        raise PullRequestError('repo.token is None, Please set it before pushing, you need `repo config -h`')
     post_url = gitee_url + namespace + '/' + self.name + '/' + 'pulls'
     pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
     if not pushurl:

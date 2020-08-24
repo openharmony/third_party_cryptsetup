@@ -33,6 +33,9 @@ class Config(Command):
     p.add_option('--bool',
                  dest='bool', action='store_true',
                  help='git config will ensure that the output is "true" or "false"')
+    p.add_option('--global',
+                 dest='Global', action='store_true',
+                 help='git config use global config file')
 
   def Execute(self, opt, args):
     if not args:
@@ -52,6 +55,9 @@ class Config(Command):
 
     if opt.bool:
       command.append('--bool')
+
+    if opt.Global:
+      command.append('--global')
 
     command.extend(args)
 

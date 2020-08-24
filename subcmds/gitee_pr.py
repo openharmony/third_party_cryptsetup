@@ -17,6 +17,7 @@ import sys
 import requests
 import json
 from command import Command
+from git_config import GitConfig
 from git_command import GitCommand
 from error import GitError
 
@@ -64,10 +65,11 @@ class GiteePr(Command):
               sys.exit(1)
           name_space = project._GiteeNamespace()
           token = self.manifest.manifestProject.config.GetString('repo.token')
-
           if not token:
-              sys.stderr.write('repo.token is None, Please set it, you need `repo config -h`\n')
-              sys.exit(1)
+              token = GitConfig.ForUser().GetString('repo.token')
+              if not token:
+                  sys.stderr.write('repo.token is None, Please set it, you need `repo config -h`\n')
+                  sys.exit(1)
           p_list = {'project_name': project_name, 'base': base_branch, 'head': branch_name}
           url = 'https://gitee.com/api/v5/repos/%s/%s/pulls' % (name_space, project_name)
           payload = {'base': base_branch, 'head': branch_name, 'page': 0, 'access_token': token, 'state': 'open'}
