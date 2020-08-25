@@ -1497,7 +1497,12 @@ class Project(object):
       # print("remote.url: %s doesn't belong to gitee" % self.remote.url)
       raise PullRequestError("remote.url: %s doesn't belong to gitee" % self.remote.url)
 
-  def _UserUrl(self, token):
+  def _UserUrl(self):
+    token = self.manifest.manifestProject.config.GetString('repo.token')
+    if not token:
+      token = GitConfig.ForUser().GetString('repo.token')
+      if not token:
+        raise UploadError('repo.token is None, Please set it, you need `repo config -h`')
     gitee_url = 'https://gitee.com/api/v5/user'
     payload = {'access_token': token}
     r = requests.get(gitee_url, json=payload)
