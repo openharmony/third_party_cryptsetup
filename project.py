@@ -1393,12 +1393,16 @@ class Project(object):
     if not pushurl:
       pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
     if not pushurl:
-      pushurl = branch.remote.name
+      # 从user_info中提取namespace进行push_url的set
+      html_url = self._UserUrl()
+      namespace = self._GiteeNamespace(html_url)
+      pushurl = 'git@gitee.com:' + '/' + namespace
+      # pushurl = branch.remote.name
     else:
       pushurl = pushurl.rstrip('/') + '/' + self.name
-      remote = self.manifest.remotes.get(branch.remote.name)
-      if remote and remote.autodotgit is not False:
-        pushurl += ".git"
+      # remote = self.manifest.remotes.get(branch.remote.name)
+      # if remote and remote.autodotgit is not False:
+      #   pushurl += ".git"
 
     cmd = ['push']
     if opt.force:
@@ -1472,8 +1476,9 @@ class Project(object):
     post_url = '/'.join([gitee_url, namespace, self.name, 'forks'])
     payload = {"access_token": token}
     r = requests.post(post_url, json=payload)
+    msg = r.json()
     # check r.msg
-    return r.status_code
+    return r.status_code, msg
 
   def _GiteeNamespace(self, url=None):
     """
@@ -1491,6 +1496,12 @@ class Project(object):
     else:
       # print("remote.url: %s doesn't belong to gitee" % self.remote.url)
       raise PullRequestError("remote.url: %s doesn't belong to gitee" % self.remote.url)
+
+  def _UserUrl(self, token):
+    gitee_url = 'https://gitee.com/api/v5/user'
+    payload = {'access_token': token}
+    r = requests.get(gitee_url, json=payload)
+    return r.json()['html_url']
 
   def UploadForReview(self, branch=None,
                       people=([], []),
