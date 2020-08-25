@@ -65,6 +65,18 @@ class PullRequestError(Exception):
   def __str__(self):
     return self.reason
 
+
+class ForkProjectError(Exception):
+  """ pull request to Gitee did not succeed.
+  """
+
+  def __init__(self, reason):
+    super(ForkProjectError, self).__init__()
+    self.reason = reason
+
+  def __str__(self):
+    return self.reason
+
 class GitError(Exception):
   """Unspecified internal error from git.
   """
