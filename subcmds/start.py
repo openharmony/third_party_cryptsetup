@@ -24,6 +24,7 @@ from git_command import git
 import gitc_utils
 from progress import Progress
 from project import SyncBuffer
+from git_config import GitConfig
 
 
 class Start(Command):
@@ -53,6 +54,7 @@ revision specified in the manifest.
     nb = args[0]
     if not git.check_ref_format('heads/%s' % nb):
       self.OptionParser.error("'%s' is not a valid name" % nb)
+
 
   def Execute(self, opt, args):
     nb = args[0]
@@ -91,11 +93,29 @@ revision specified in the manifest.
     if not opt.all:
       fork_success_count = 0
       token = self.manifest.manifestProject.config.GetString('repo.token')
+      if not token:
+        token = GitConfig.ForUser().GetString('repo.token')
+        if not token:
+          sys.stderr.write('repo.token is None, Please set it, you need `repo config -h`\n')
+          sys.exit(1)
+      pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
+      success_msg = None
       for project in all_projects:
-        status_code = project.ForkProject(token)
+        status_code, msg = project.ForkProject(token)
         if status_code == 201:
           fork_success_count += 1
-      print("fork_success: {}".format(fork_success_count))
+          if not success_msg:
+            success_msg = msg
+
+      if fork_success_count > 0 and pushurl is None:
+        # 初始化push_url
+        # 把response中的信息存到push_url中
+        ssh_url = success_msg['namespace']['ssh_url']
+        pushurl = ssh_url.split('/')[0]
+        self.manifest.manifestProject.config.SetString('repo.pushurl',  pushurl)
+
+
+      print("fork_success: %s" %fork_success_count)
 
 
       # 展示fork状态，失败、成功、已存在

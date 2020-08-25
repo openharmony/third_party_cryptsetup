@@ -299,6 +299,19 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
               branch.name,
               str(branch.error)),
               file=sys.stderr)
+          status_code, msg = branch.project.ForkProject()
+          if status_code == 201:
+              print('[FORK     OK] %-15s %s' % (
+                     branch.project.relpath + '/',
+                     branch.name),
+                    file=sys.stderr)
+          else:
+              print(('[FORK  FAILED] %-15s %-15s') % (
+                  branch.project.relpath + '/',
+                  branch.name,
+                  str(msg['message'])),
+                    file=sys.stderr)
+
         if branch.have_pr_errors:
             if not branch.pull_requested:
               if len(str(branch.pr_error)) <= 30:
