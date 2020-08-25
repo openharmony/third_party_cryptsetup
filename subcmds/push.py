@@ -309,7 +309,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
               print(('[FORK  FAILED] %-15s %-15s %s') % (
                   branch.project.relpath + '/',
                   branch.name,
-                  str(msg['message'])),
+                  msg['message']),
                     file=sys.stderr)
 
         if branch.have_pr_errors:
