@@ -110,7 +110,7 @@ revision specified in the manifest.
       if fork_success_count > 0 and pushurl is None:
         # 初始化push_url
         # 把response中的信息存到push_url中
-        ssh_url = success_msg['namespace']['ssh_url']
+        ssh_url = success_msg['ssh_url']
         pushurl = ssh_url.split('/')[0]
         self.manifest.manifestProject.config.SetString('repo.pushurl',  pushurl)
 
