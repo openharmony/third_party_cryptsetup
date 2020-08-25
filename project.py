@@ -36,7 +36,7 @@ from color import Coloring
 from git_command import GitCommand, git_require
 from git_config import GitConfig, IsId, GetSchemeFromUrl, GetUrlCookieFile, \
     ID_RE
-from error import GitError, HookError, UploadError, DownloadError, PullRequestError
+from error import GitError, HookError, UploadError, DownloadError, PullRequestError, ForkProjectError
 from error import ManifestInvalidRevisionError, ManifestInvalidPathError
 from error import NoManifestException
 import platform_utils
@@ -1477,7 +1477,7 @@ class Project(object):
       if not token:
         token = GitConfig.ForUser().GetString('repo.token')
         if not token:
-          raise PullRequestError('repo.token is None, Please set it before pushing, you need `repo config -h`')
+          raise ForkProjectError('repo.token is None, Please set it before pushing, you need `repo config -h`')
     gitee_url = 'https://gitee.com/api/v5/repos'
     namespace = self._GiteeNamespace(type='upload')
     post_url = '/'.join([gitee_url, namespace, self.name, 'forks'])
