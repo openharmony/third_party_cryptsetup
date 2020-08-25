@@ -1394,12 +1394,12 @@ class Project(object):
       pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
     if not pushurl:
       # 从user_info中提取namespace进行push_url的set
-      html_url = self._UserUrl()
-      namespace = self._GiteeNamespace(html_url)
-      pushurl = 'git@gitee.com:' + '/' + namespace
+      html_url = self._UserUrl().rstrip('/') + '/'
+      namespace = self._GiteeNamespace(html_url, type='upload')
+      pushurl = 'git@gitee.com:' + namespace
+      self.manifest.manifestProject.config.SetString('repo.pushurl', pushurl)
       # pushurl = branch.remote.name
-    else:
-      pushurl = pushurl.rstrip('/') + '/' + self.name
+    pushurl = pushurl.rstrip('/') + '/' + self.name
       # remote = self.manifest.remotes.get(branch.remote.name)
       # if remote and remote.autodotgit is not False:
       #   pushurl += ".git"
@@ -1446,6 +1446,7 @@ class Project(object):
     if not pushurl:
       head = branch
     else:
+      pushurl = pushurl.rstrip('/') + '/'
       head = ':'.join([self._GiteeNamespace(pushurl), branch])
     payload = {"access_token": token, "title": 'Gitee Review - {}'.format(branch), "head": head,
                "base": base_branch, "assignees": ','.join(peoples)}
@@ -1461,7 +1462,7 @@ class Project(object):
   # print('pull request %s  code :%s \n' %(post_url, r.status_code))
   # print('project: %s head: %s' %(branch.project.name, branch.name))
 
-  def ForkProject(self, token):
+  def ForkProject(self, token=None):
     """
     1.确认用户信息
     2.进行仓库的fork动作
@@ -1471,8 +1472,14 @@ class Project(object):
     #     fork
     # else:
     # use open_api get namespace
+    if not token:
+      token = self.manifest.manifestProject.config.GetString('repo.token')
+      if not token:
+        token = GitConfig.ForUser().GetString('repo.token')
+        if not token:
+          raise PullRequestError('repo.token is None, Please set it before pushing, you need `repo config -h`')
     gitee_url = 'https://gitee.com/api/v5/repos'
-    namespace = self._GiteeNamespace()
+    namespace = self._GiteeNamespace(type='upload')
     post_url = '/'.join([gitee_url, namespace, self.name, 'forks'])
     payload = {"access_token": token}
     r = requests.post(post_url, json=payload)
@@ -1480,7 +1487,7 @@ class Project(object):
     # check r.msg
     return r.status_code, msg
 
-  def _GiteeNamespace(self, url=None):
+  def _GiteeNamespace(self, url=None, type='pullrequest'):
     """
     GET remote_url namespace
     """
@@ -1494,8 +1501,11 @@ class Project(object):
     elif name2:
       return name2.group(1)
     else:
+      if type == 'pullrequest':
       # print("remote.url: %s doesn't belong to gitee" % self.remote.url)
-      raise PullRequestError("remote.url: %s doesn't belong to gitee" % self.remote.url)
+        raise PullRequestError("remote.url: %s doesn't belong to gitee" % self.check_url)
+      else:
+        raise UploadError("remote.url: %s doesn't belong to gitee" % self.check_url)
 
   def _UserUrl(self):
     token = self.manifest.manifestProject.config.GetString('repo.token')
@@ -1505,7 +1515,7 @@ class Project(object):
         raise UploadError('repo.token is None, Please set it, you need `repo config -h`')
     gitee_url = 'https://gitee.com/api/v5/user'
     payload = {'access_token': token}
-    r = requests.get(gitee_url, json=payload)
+    r = requests.get(gitee_url, params=payload)
     return r.json()['html_url']
 
   def UploadForReview(self, branch=None,
