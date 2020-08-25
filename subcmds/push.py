@@ -301,12 +301,12 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
               file=sys.stderr)
           status_code, msg = branch.project.ForkProject()
           if status_code == 201:
-              print('[FORK     OK] %-15s %s' % (
+              print('[FORK      OK] %-15s %s' % (
                      branch.project.relpath + '/',
                      branch.name),
                     file=sys.stderr)
           else:
-              print(('[FORK  FAILED] %-15s %-15s') % (
+              print(('[FORK  FAILED] %-15s %-15s %s') % (
                   branch.project.relpath + '/',
                   branch.name,
                   str(msg['message'])),
