@@ -318,24 +318,24 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
                 fmt = ' (%s)'
               else:
                 fmt = '\n       (%s)'
-              print(('[PR   FAILED] %-15s %-15s' + fmt) % (
+              print(('[PR    FAILED] %-15s %-15s' + fmt) % (
                      branch.project.relpath + '/',
                      branch.name,
                      unicode(branch.pr_error)),
                      file=sys.stderr)
 
-      print("'if your PR FAILED ,`repo push` again to create PR after handling the error'", file=sys.stderr)
+      print("'if your PR FAILED or FORK OK, `repo push` again to create PR after handling the thing'", file=sys.stderr)
       print()
 
     for branch in todo:
         if branch.uploaded:
-          print('[PUSH     OK] %-15s %s ' % (
+          print('[PUSH      OK] %-15s %s ' % (
                  branch.project.relpath + '/',
                  branch.name),
                  file=sys.stderr)
         if branch.have_pr:
             if branch.pull_requested:
-              print('[PR       OK] %-15s %s pr_url: %s' % (
+              print('[PR        OK] %-15s %s pr_url: %s' % (
                      branch.project.relpath + '/',
                      branch.name, branch.pr_url),
                      file=sys.stderr)
