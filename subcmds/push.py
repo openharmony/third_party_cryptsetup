@@ -274,7 +274,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
         branch.uploaded = False
         have_errors = True
       except GitError as e:
-        print("Error: "+ str(e), file=sys.stderr)
+        print("Error: "+ unicode(e), file=sys.stderr)
         sys.exit(1)
       except PullRequestError as e:
         branch.pr_error = e
@@ -290,14 +290,14 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
     if have_errors:
       for branch in todo:
         if not branch.uploaded:
-          if len(str(branch.error)) <= 30:
+          if len(unicode(branch.error)) <= 30:
             fmt = ' (%s)'
           else:
             fmt = '\n       (%s)'
           print(('[PUSH  FAILED] %-15s %-15s' + fmt) % (
               branch.project.relpath + '/',
               branch.name,
-              str(branch.error)),
+              unicode(branch.error)),
               file=sys.stderr)
           status_code, msg = branch.project.ForkProject()
           if status_code == 201:
@@ -314,14 +314,14 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
 
         if branch.have_pr_errors:
             if not branch.pull_requested:
-              if len(str(branch.pr_error)) <= 30:
+              if len(unicode(branch.pr_error)) <= 30:
                 fmt = ' (%s)'
               else:
                 fmt = '\n       (%s)'
               print(('[PR   FAILED] %-15s %-15s' + fmt) % (
                      branch.project.relpath + '/',
                      branch.name,
-                     str(branch.pr_error)),
+                     unicode(branch.pr_error)),
                      file=sys.stderr)
 
       print("'if your PR FAILED ,`repo push` again to create PR after handling the error'", file=sys.stderr)
