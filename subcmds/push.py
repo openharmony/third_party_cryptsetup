@@ -360,7 +360,6 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
         sys.exit(1)
 
     # if not create new branch, check whether branch has new commit.
-    # TODO check branch existed status
     if branch:
         for project in project_list:
           branch_tmp = branch
@@ -368,8 +367,9 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
                   project.GetUploadableBranch(branch) is None):
             continue
           branch_tmp = project.GetBranch(branch_tmp)
-          rb = ReviewableBranch(project, branch_tmp, branch_tmp.LocalMerge)
-          pending.append((project, [rb]))
+          if branch_tmp.LocalMerge:
+            rb = ReviewableBranch(project, branch_tmp, branch_tmp.LocalMerge)
+            pending.append((project, [rb]))
 
     else:
         for project in project_list:
