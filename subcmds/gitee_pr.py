@@ -13,16 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import unicode_literals
 from __future__ import print_function
 
 import sys
 import requests
-import json
 from command import Command
 from git_config import GitConfig
-from git_command import GitCommand
-from error import GitError
-
 
 class GiteePr(Command):
   common = True
@@ -31,10 +28,13 @@ class GiteePr(Command):
 %prog [<project>...]
 """
 
-  # def _Options(self, p):
-  #   p.add_option('--build',
-  #                dest='build', action='store_true',
-  #                help="To trigger ci with repo's config hook")
+  def _Options(self, p):
+    # p.add_option('--build',
+    #              dest='build', action='store_true',
+    #              help="To trigger ci with repo's config hook")
+    p.add_option('--br',
+                 type='string', action='store', dest='branch',
+                 help='branch to push.')
 
   def Execute(self, opt, args):
       """
@@ -53,6 +53,11 @@ class GiteePr(Command):
       },{},{}]
       """
       result = []
+      if opt.branch:
+          branch = opt.branch
+      else:
+          print('error: need --br option', file=sys.stderr)
+          sys.exit(1)
       all = self.GetProjects(args)
       for project in all:
           if project.revisionExpr:
@@ -60,11 +65,15 @@ class GiteePr(Command):
           else:
              base_branch = project.manifest.default.revisionExpr
           project_name = project.name
-          branch_name = project.CurrentBranch
+          branch_tmp = project.GetBranch(branch)
+          if not branch_tmp.LocalMerge:
+              continue
+          branch_name = branch
 
-          if not branch_name:
-              sys.stderr.write('CurrentBranch is None, Please set it, you need `repo start -h`\n')
-              sys.exit(1)
+          # if not branch_name:
+          #     sys.stderr.write('CurrentBranch is None, Please set it, you need `repo start -h`\n')
+          #     sys.exit(1)
+
           name_space = project._GiteeNamespace()
           token = self.manifest.manifestProject.config.GetString('repo.token')
           if not token:
@@ -78,29 +87,14 @@ class GiteePr(Command):
           try:
               r = requests.get(url, params=payload, timeout=5)
               pr_url = [tmp['html_url'] for tmp in r.json()]
-              p_list['pull_request'] = pr_url if pr_url else ['']
-              # total_page = int(r.headers['total_page'])
-              # for page in range(2, total_page+1):
-              #     payload['page'] = int(page)
-              #     r = requests.get(url, params=payload)
-              #     p_list['pull_request'].extend([tmp['html_url'] for tmp in r.json()])
+              if pr_url:
+                p_list['pull_request'] = pr_url
+              else:
+                continue
               result.append(p_list)
           except Exception as e:
               sys.stderr.write('ERROR: %s\n' % e)
               sys.exit(1)
-      # if opt.build:
-      #     hook_url = self.manifest.manifestProject.config.GetString('repo.hook')
-      #     if not hook_url:
-      #         sys.stderr.write('repo.hook is None, Please set it, you need `repo config -h`\n')
-      #         sys.exit(1)
-      #     try:
-      #         response = requests.post(hook_url, json=json.dumps(result), timeout=5)
-      #     except Exception as e:
-      #         sys.stderr.write('POST HOOK ERROR: %s\n' % e)
-      #         sys.exit(1)
-      #     print('POST HOOK SUCCESS')
-      #     print('STATUS: %s' % response.status_code)
-      #     print('BODY: %s' % response.content)
 
 
 
