@@ -172,6 +172,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
 
       pushurl = project.manifest.manifestProject.config.GetString('repo.pushurl')
       sys.stdout.write('to %s (y/n)? ' % (pushurl and 'server: ' + pushurl or 'remote') )
+      sys.stdout.flush()
       answer = sys.stdin.readline().strip()
       answer = answer in ('y', 'Y', 'yes', '1', 'true', 't')
 
