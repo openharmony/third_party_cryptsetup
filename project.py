@@ -1450,7 +1450,7 @@ class Project(object):
       head = ':'.join([self._GiteeNamespace(pushurl), branch])
     payload = {"access_token": token, "title": 'Gitee Review - {}'.format(branch), "head": head,
                "base": base_branch, "assignees": ','.join(peoples)}
-    r = requests.post(post_url, json=payload)
+    r = requests.post(post_url, json=payload, timeout=5)
     r_j = r.json()
     if r.status_code != 201:
       error_message = r_j['message']
@@ -1482,7 +1482,7 @@ class Project(object):
     namespace = self._GiteeNamespace(type='upload')
     post_url = '/'.join([gitee_url, namespace, self.name, 'forks'])
     payload = {"access_token": token}
-    r = requests.post(post_url, json=payload)
+    r = requests.post(post_url, json=payload, timeout=5)
     msg = r.json()
     # check r.msg
     return r.status_code, msg
@@ -1515,7 +1515,9 @@ class Project(object):
         raise UploadError('repo.token is None, Please set it, you need `repo config -h`')
     gitee_url = 'https://gitee.com/api/v5/user'
     payload = {'access_token': token}
-    r = requests.get(gitee_url, params=payload)
+    r = requests.get(gitee_url, params=payload, timeout=5)
+    if r.status_code != 200:
+      raise UploadError('repo.token is Error, Please reset')
     return r.json()['html_url']
 
   def UploadForReview(self, branch=None,
