@@ -115,7 +115,7 @@ revision specified in the manifest.
         self.manifest.manifestProject.config.SetString('repo.pushurl',  pushurl)
 
 
-      print("fork_success: %s" %fork_success_count)
+      # print("fork_success: %s" %fork_success_count)
 
 
       # 展示fork状态，失败、成功、已存在

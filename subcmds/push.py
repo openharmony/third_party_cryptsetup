@@ -244,6 +244,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
     self._UploadAndReport(opt, todo, peoples)
 
   def _UploadAndReport(self, opt, todo, peoples):
+    exist_regex = r'^ 已存在相同源分支.*'
     have_errors = False
     for branch in todo:
       branch.have_pr_errors = False
@@ -315,6 +316,8 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
 
         if branch.have_pr_errors:
             if not branch.pull_requested:
+              if re.match(exist_regex, unicode(branch.pr_error).split(':')[3]):
+                continue
               if len(unicode(branch.pr_error)) <= 30:
                 fmt = ' (%s)'
               else:
