@@ -128,6 +128,9 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
     p.add_option('-p', '--pr_force',
                  dest='pr_force', action='store_true',
                  help='creation pull request without configuration.')
+    p.add_option('--content',
+                 type='string', action='store', dest='content',
+                 help='content of pull request.')
     p.add_option('-f', '--force',
                  dest='force',  action='store_true',
                  help='push without rewind check.')

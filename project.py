@@ -1450,6 +1450,8 @@ class Project(object):
       head = ':'.join([self._GiteeNamespace(pushurl), branch])
     payload = {"access_token": token, "title": 'Gitee Review - {}'.format(branch), "head": head,
                "base": base_branch, "assignees": ','.join(peoples)}
+    if opt.content:
+      payload['body'] = opt.content
     r = requests.post(post_url, json=payload, timeout=5)
     r_j = r.json()
     if r.status_code != 201:
