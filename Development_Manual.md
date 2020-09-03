@@ -30,7 +30,7 @@ subcmds目录下所有命令的父类
 异常类
 
 ### manifest_xml
-manifest_xml模块
+manifest_xml文件的解析模块
 
 ### project
 项目模型模块，与项目相关的基础操作模块
