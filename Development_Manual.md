@@ -91,3 +91,16 @@ def Execute(self, opt, args):
 3、拿到构造好的的待处理的数据，进行命令的主要逻辑（开始推送）  
 
 
+## 3、相关资料
+git权威指南资料  **Android式多版本库协同**章节其中介绍了repo  
+地址:http://www.worldhello.net/gotgit/04-git-model/060-android-model.html   
+
+当前版本repo  **命令参考文档** :  
+地址:https://source.android.google.cn/setup/develop/repo?hl=zh-cn  
+
+ **gerrit dockerhub:**   
+https://hub.docker.com/r/gerritcodereview/gerrit
+
+ **AGit-Flow:**   
+https://git-repo.info/zh_cn/2020/03/agit-flow-and-git-repo/  
+可惜只能用在AGit-Flow上
