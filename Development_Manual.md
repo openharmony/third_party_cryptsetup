@@ -54,7 +54,7 @@ repo push 命令对应模块
 
 ## 2、具体开发案例
 
-### repo psuh 举例
+### repo push 举例
 ```python
 def Execute(self, opt, args):
     project_list = self.GetProjects(args)  #获取repo push仓库列表
@@ -87,7 +87,7 @@ def Execute(self, opt, args):
 ```
 以上是我截取的repo push命令的主要逻辑，同时类比subcmds下的命令都是类似的逻辑  
 1、通过args参数获取需要处理的project_list（获取需要处理的仓列表）  
-2、通过opt参数，判断命令是否选择了相关的option进行进一步判断,进行数据处理（构造需要推送的分支）  
+2、通过opt参数，判断命令是否选择了相关的option进行进一步判断，进行数据处理（构造需要推送的分支）  
 3、拿到构造好的的待处理的数据，进行命令的主要逻辑（开始推送）  
 
 
