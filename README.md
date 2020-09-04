@@ -39,10 +39,11 @@ repo init -u git@gitee.com:{namespace}/manifest.git
 
 ### 1.repo 引导命令安装
 ```shell
-# python3版本 向下兼容 
-curl https://gitee.com/MarineJ/repo/raw/master/repo-py3 > /usr/local/bin/repo
-
+# python3版本 向下兼容
+curl https://gitee.com/oschina/repo/raw/master/repo-py3 > /usr/local/bin/repo
+# 赋予脚本可执行权限
 chmod a+x /usr/local/bin/repo
+# 安装requests依赖，或在执行命令时依据提示自动安装
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple requests
 ```
 
