@@ -1,5 +1,8 @@
 ## 开发手册
 
+## 0、关于repo脚本
+通过curl下载的repo命令只是一个引导脚本，执行命令时会在workspace中去寻找通过repo init 下载的真正的repo代码，进行命令的真正触发  
+
 ## 1、二开关键部分
 
 ```
@@ -89,5 +92,21 @@ def Execute(self, opt, args):
 1、通过args参数获取需要处理的project_list（获取需要处理的仓列表）  
 2、通过opt参数，判断命令是否选择了相关的option进行进一步判断,进行数据处理（构造需要推送的分支）  
 3、拿到构造好的的待处理的数据，进行命令的主要逻辑（开始推送）  
+
+
+
+## 3、相关资料
+git权威指南资料  **Android式多版本库协同**章节其中介绍了repo  
+地址:http://www.worldhello.net/gotgit/04-git-model/060-android-model.html   
+
+当前版本repo  **命令参考文档** :  
+地址:https://source.android.google.cn/setup/develop/repo?hl=zh-cn  
+
+ **gerrit dockerhub:**   
+https://hub.docker.com/r/gerritcodereview/gerrit
+
+ **AGit-Flow:**   
+https://git-repo.info/zh_cn/2020/03/agit-flow-and-git-repo/  
+可惜只能用在AGit-Flow上
 
 
