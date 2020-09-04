@@ -40,7 +40,7 @@ repo init -u git@gitee.com:{namespace}/manifest.git
 ### 1.repo 引导命令安装
 ```shell
 # python3版本 向下兼容
-curl https://gitee.com/oschina/repo/raw/master/repo-py3 > /usr/local/bin/repo
+curl https://gitee.com/oschina/repo/raw/fork_flow/repo-py3 > /usr/local/bin/repo
 # 赋予脚本可执行权限
 chmod a+x /usr/local/bin/repo
 # 安装requests依赖，或在执行命令时依据提示自动安装
@@ -73,7 +73,7 @@ repo gitee-pr --br={BRANCH} #获取项目推送后的指定分支的PR列表
  
 ```
  **repo push**  参数介绍    
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0727/153237_fa6f2339_1332572.png "屏幕截图.png")  
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0904/191114_41c2e24f_1332572.png "屏幕截图.png")    
 1、其中值得注意的是 **--dest_branch** 和 **--br** 参数，如果不填写对应的分支的话会基于默认分支进行操作， **--br** 默认会以当前分支进行提交， **--dest_branch** 会以manifest.xml中的default  **revision** 作为默认目标分支  
 2、当repo push对仓库进行推送时，会默认向与token相关的用户个人namespace下的仓库推送，在切换分支时没有预先fork成功，则在repo push失败时会再次以token关联的用户对上游仓库进行fork，fork成功后再次push即可  
 3、repo push默认会以ssh方式向token关联的用户的namespace下进行仓库推送，若需要改为https，则可根据repo config repo.pushurl {用户域名空间地址如:https://gitee.com/xxxx}
