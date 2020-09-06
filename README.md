@@ -69,7 +69,7 @@ repo config --global repo.token {TOKEN} #  进行gitee access_token配置, acc
 repo config repo.pullrequest {True/False} #  对是否触发PR进行配置 
 repo push --br={BRANCH} --d={DEST_BRANCH}  #  进行推送并生成PR和审查，执行后会展示出可进行推送的项目，去掉注释的分支会进行后续推送
 
-repo gitee-pr --br={BRANCH} #获取项目推送后的指定分支的PR列表  
+repo gitee-pr --br={BRANCH} #  获取项目推送后的指定分支的PR列表  
  
 ```
  **repo push**  参数介绍    
@@ -84,7 +84,7 @@ repo gitee-pr --br={BRANCH} #获取项目推送后的指定分支的PR列表
 
 
  **repo gitee-pr** 参数介绍  
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0810/150553_30f9b022_1332572.png "屏幕截图.png")  
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0906/230859_93627600_1332572.png "屏幕截图.png")  
 1、在 --br={BRANCH} 参数情况下直接返回指定分支下，在gitee平台上已经提交过的PR   
 
 ### Q&A 
