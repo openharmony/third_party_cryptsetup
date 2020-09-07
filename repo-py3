@@ -127,7 +127,7 @@ if __name__ == '__main__':
 #
 REPO_URL = os.environ.get('REPO_URL', None)
 if not REPO_URL:
-  REPO_URL = 'git@gitee.com:oschina/repo.git'
+  REPO_URL = 'https://gitee.com/oschina/repo.git'
 REPO_REV = os.environ.get('REPO_REV')
 if not REPO_REV:
   REPO_REV = 'fork_flow'
