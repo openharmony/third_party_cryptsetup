@@ -1,4 +1,4 @@
-### 大致流程
+### 使用流程介绍
  **注意:**  以下说明中包含{*}的内容均代表变量
 1. manifest.xml 文件配置
 2. repo 引导命令下载
@@ -12,7 +12,7 @@
 10. repo sync 或 repo forall -c git pull 进行代码批量同步
     
 
-### manifest配置例子
+### Manifest 配置例子
 在名为**manifest**的仓库中创建一个default.xml文件作为repo初始化的依据  
 以下为repo init初始化命令, 需要用 **-u**参数  来指定manifest的git仓库
 ```shell
@@ -37,7 +37,7 @@ repo init -u git@gitee.com:{namespace}/manifest.git
 2、不同的项目也可以有不同的 **revision** ，也就是说之后提交PR的目标分支也可不同， **revision** 的优先级由低到高  
 3、fetch当前只支持gitee的ssh  
 
-### 1.repo 引导命令安装
+### 1. Repo 引导命令安装
 ```shell
 # python3版本 向下兼容
 curl https://gitee.com/oschina/repo/raw/fork_flow/repo-py3 > /usr/local/bin/repo
@@ -48,14 +48,14 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple requests
 ```
 
 
-### 2.repo初始化与仓库初次同步
+### 2. Repo 初始化与仓库初次同步
 ```shell
 mkdir your_project && cd your_project
 repo init -u git@gitee.com:{namespace}/manifest.git
 repo sync
 ```
 
-### 3.repo+gitee本地开发流程
+### 3. Repo + Gitee 本地开发流程
 ```shell
 repo start {branch} --all #  切换开发分支，当对部分仓库进行指定时，会触发仓库的预先fork
 
@@ -86,5 +86,3 @@ repo gitee-pr --br={BRANCH} #  获取项目推送后的指定分支的PR列表
  **repo gitee-pr** 参数介绍  
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0906/230859_93627600_1332572.png "屏幕截图.png")  
 1、在 --br={BRANCH} 参数情况下直接返回指定分支下，在gitee平台上已经提交过的PR   
-
-### Q&A 
