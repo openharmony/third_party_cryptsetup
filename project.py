@@ -36,6 +36,7 @@ from color import Coloring
 from git_command import GitCommand, git_require
 from git_config import GitConfig, IsId, GetSchemeFromUrl, GetUrlCookieFile, \
     ID_RE
+from settings import GITEE_SSH, GITEE_REPO_API, GITEE_USER_API, TIMEOUT
 from error import GitError, HookError, UploadError, DownloadError, PullRequestError, ForkProjectError
 from error import ManifestInvalidRevisionError, ManifestInvalidPathError
 from error import NoManifestException
@@ -1393,10 +1394,9 @@ class Project(object):
     if not pushurl:
       pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
     if not pushurl:
-      # 从user_info中提取namespace进行push_url的set
       html_url = self._UserUrl().rstrip('/') + '/'
       namespace = self._GiteeNamespace(html_url, type='upload')
-      pushurl = 'git@gitee.com:' + namespace
+      pushurl = ':'.join([GITEE_SSH, namespace])
       self.manifest.manifestProject.config.SetString('repo.pushurl', pushurl)
       # pushurl = branch.remote.name
     pushurl = pushurl.rstrip('/') + '/' + self.name
@@ -1434,14 +1434,13 @@ class Project(object):
       print("default revisionExpr %s" % self.manifest.default.revisionExpr)
       base_branch = self.manifest.default.revisionExpr
     # print("your config reviewers are: %s" % peoples)
-    gitee_url = 'https://gitee.com/api/v5/repos/'
     namespace = self._GiteeNamespace()
     token = self.manifest.manifestProject.config.GetString('repo.token')
     if not token:
       token = GitConfig.ForUser().GetString('repo.token')
       if not token:
         raise PullRequestError('repo.token is None, Please set it before pushing, you need `repo config -h`')
-    post_url = gitee_url + namespace + '/' + self.name + '/' + 'pulls'
+    post_url = '/'.join([GITEE_REPO_API, namespace, self.name, 'pulls'])
     pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
     if not pushurl:
       head = branch
@@ -1452,47 +1451,29 @@ class Project(object):
                "base": base_branch, "assignees": ','.join(peoples)}
     if opt.content:
       payload['body'] = opt.content
-    r = requests.post(post_url, json=payload, timeout=5)
+    r = requests.post(post_url, json=payload, timeout=TIMEOUT)
     r_j = r.json()
     if r.status_code != 201:
       error_message = r_j['message']
       raise PullRequestError('pull request %s  code :%s  error: %s' %
                              (post_url, r.status_code, error_message))
-    elif r_j['html_url']:
-        return r_j['html_url']
-
-  # print('pull request %s  code :%s \n' %(post_url, r.status_code))
-  # print('project: %s head: %s' %(branch.project.name, branch.name))
+    return r_j['html_url']
 
   def ForkProject(self, token=None):
-    """
-    1.确认用户信息
-    2.进行仓库的fork动作
-    :return: fork_status
-    """
-    # if user_info_local:
-    #     fork
-    # else:
-    # use open_api get namespace
     if not token:
       token = self.manifest.manifestProject.config.GetString('repo.token')
       if not token:
         token = GitConfig.ForUser().GetString('repo.token')
         if not token:
           raise ForkProjectError('repo.token is None, Please set it before pushing, you need `repo config -h`')
-    gitee_url = 'https://gitee.com/api/v5/repos'
     namespace = self._GiteeNamespace(type='upload')
-    post_url = '/'.join([gitee_url, namespace, self.name, 'forks'])
+    post_url = '/'.join([GITEE_REPO_API, namespace, self.name, 'forks'])
     payload = {"access_token": token}
-    r = requests.post(post_url, json=payload, timeout=5)
+    r = requests.post(post_url, json=payload, timeout=TIMEOUT)
     msg = r.json()
-    # check r.msg
     return r.status_code, msg
 
   def _GiteeNamespace(self, url=None, type='pullrequest'):
-    """
-    GET remote_url namespace
-    """
     check_url = url if url is not None else self.remote.url
     regex1 = r'^git@gitee.com:(.*?)/.*'
     regex2 = r'^https://gitee.com/(.*?)/.*'
@@ -1515,9 +1496,8 @@ class Project(object):
       token = GitConfig.ForUser().GetString('repo.token')
       if not token:
         raise UploadError('repo.token is None, Please set it, you need `repo config -h`')
-    gitee_url = 'https://gitee.com/api/v5/user'
     payload = {'access_token': token}
-    r = requests.get(gitee_url, params=payload, timeout=5)
+    r = requests.get(GITEE_USER_API, params=payload, timeout=TIMEOUT)
     if r.status_code != 200:
       raise UploadError('repo.token is Error, Please reset')
     return r.json()['html_url']

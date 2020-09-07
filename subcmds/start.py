@@ -106,19 +106,11 @@ revision specified in the manifest.
           fork_success_count += 1
           if not success_msg:
             success_msg = msg
-
       if fork_success_count > 0 and pushurl is None:
-        # 初始化push_url
-        # 把response中的信息存到push_url中
         ssh_url = success_msg['ssh_url']
         pushurl = ssh_url.split('/')[0]
         self.manifest.manifestProject.config.SetString('repo.pushurl',  pushurl)
 
-
-      # print("fork_success: %s" %fork_success_count)
-
-
-      # 展示fork状态，失败、成功、已存在
     for project in all_projects:
       pm.update()
 

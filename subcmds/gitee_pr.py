@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 #
-# Copyright (C) 2010 JiangXin@ossxp.com
+# Copyright (C) 2020 hellowjbb@gmail.com
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import sys
 import requests
 from command import Command
 from git_config import GitConfig
+from settings import GITEE_REPO_API, TIMEOUT
 
 class GiteePr(Command):
   common = True
@@ -34,24 +35,9 @@ class GiteePr(Command):
     #              help="To trigger ci with repo's config hook")
     p.add_option('--br',
                  type='string', action='store', dest='branch',
-                 help='branch to push.')
+                 help='branch that have been pushed.')
 
   def Execute(self, opt, args):
-      """
-      1.获取project_list的信息，
-      2.获取openapi中pr的信息
-      3.整合project与pr的关键信息
-      4.向配置的hook发送post请求
-      :param opt:
-      :param args:
-      :return:
-      [{
-      project:name
-      project_pr:
-        branch of current_branch:[{
-        }]
-      },{},{}]
-      """
       result = []
       if opt.branch:
           branch = opt.branch
@@ -82,10 +68,10 @@ class GiteePr(Command):
                   sys.stderr.write('repo.token is None, Please set it, you need `repo config -h`\n')
                   sys.exit(1)
           p_list = {'project_name': project_name, 'base': base_branch, 'head': branch_name}
-          url = 'https://gitee.com/api/v5/repos/%s/%s/pulls' % (name_space, project_name)
+          url = '/'.join([GITEE_REPO_API, name_space, project_name, 'pulls'])
           payload = {'base': base_branch, 'head': branch_name, 'page': 0, 'access_token': token, 'state': 'open'}
           try:
-              r = requests.get(url, params=payload, timeout=5)
+              r = requests.get(url, params=payload, timeout=TIMEOUT)
               pr_url = [tmp['html_url'] for tmp in r.json()]
               if pr_url:
                 p_list['pull_request'] = pr_url
@@ -100,7 +86,7 @@ class GiteePr(Command):
 
 
       for project in result:
-          print('%s        %s pr_url: %s' % (project['project_name'], project['head'], project['pull_request'][0]))
+          print('%s %-15s pr_url: %s' % (project['project_name'], project['head'], project['pull_request'][0]))
 
 
 
