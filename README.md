@@ -46,8 +46,7 @@ chmod a+x /usr/local/bin/repo
 # 安装requests依赖，或在执行命令时依据提示自动安装
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple requests
 
-# 如果安装成功但是还是提示错误，建议使用 PyEnv 进行环境的管理
-
+# 如果安装成功但是还是提示错误，建议使用 PyEnv 进行 Python 环境的管理
 https://gitee.com/mirrors/pyenv
 ```
 
