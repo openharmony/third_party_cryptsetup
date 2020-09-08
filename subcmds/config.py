@@ -64,3 +64,7 @@ class Config(Command):
 
     if GitCommand(mp, command).Wait() != 0:
         return -1
+
+    if len(args) > 1 and args[0] == 'repo.token':
+      # remove pushurl
+      mp.config.SetString('repo.pushurl', None)

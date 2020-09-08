@@ -20,7 +20,7 @@ import re
 import sys
 from command import InteractiveCommand
 from editor import Editor
-from error import UploadError, GitError, PullRequestError
+from error import UploadError, GitError, PullRequestError, ForkProjectError
 from project import ReviewableBranch
 
 from pyversion import is_python3
@@ -304,22 +304,34 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
               branch.name,
               unicode(branch.error)),
               file=sys.stderr)
-          status_code, msg = branch.project.ForkProject()
-          if status_code == 201:
-              print('[FORK      OK] %-15s %s' % (
-                     branch.project.relpath + '/',
-                     branch.name),
-                    file=sys.stderr)
-          else:
+          # TODO optimize ForkProjectError
+          try:
+              status_code, msg = branch.project.ForkProject()
+              if status_code == 201:
+                  print('[FORK      OK] %-15s %s' % (
+                         branch.project.relpath + '/',
+                         branch.name),
+                        file=sys.stderr)
+              else:
+                  print(('[FORK  FAILED] %-15s %-15s %s') % (
+                      branch.project.relpath + '/',
+                      branch.name,
+                      unicode(msg['message'])),
+                        file=sys.stderr)
+          except ForkProjectError as e:
               print(('[FORK  FAILED] %-15s %-15s %s') % (
                   branch.project.relpath + '/',
                   branch.name,
-                  unicode(msg['message'])),
+                  unicode(e)),
                     file=sys.stderr)
+
+
+
 
         if branch.have_pr_errors:
             if not branch.pull_requested:
-              if re.match(exist_regex, unicode(branch.pr_error).split(':')[3]):
+              check_error = unicode(branch.pr_error).split(':')
+              if len(check_error) >= 4 and re.match(exist_regex, check_error[3]):
                 continue
               if len(unicode(branch.pr_error)) <= 30:
                 fmt = ' (%s)'

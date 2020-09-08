@@ -1451,7 +1451,11 @@ class Project(object):
                "base": base_branch, "assignees": ','.join(peoples)}
     if opt.content:
       payload['body'] = opt.content
-    r = requests.post(post_url, json=payload, timeout=TIMEOUT)
+    try:
+      r = requests.post(post_url, json=payload, timeout=TIMEOUT)
+    except requests.exceptions.RequestException as e:
+      raise PullRequestError('requests error: %s' % e)
+
     r_j = r.json()
     if r.status_code != 201:
       error_message = r_j['message']
@@ -1466,10 +1470,13 @@ class Project(object):
         token = GitConfig.ForUser().GetString('repo.token')
         if not token:
           raise ForkProjectError('repo.token is None, Please set it before pushing, you need `repo config -h`')
-    namespace = self._GiteeNamespace(type='upload')
+    namespace = self._GiteeNamespace(type='forkproject')
     post_url = '/'.join([GITEE_REPO_API, namespace, self.name, 'forks'])
     payload = {"access_token": token}
-    r = requests.post(post_url, json=payload, timeout=TIMEOUT)
+    try:
+      r = requests.post(post_url, json=payload, timeout=TIMEOUT)
+    except requests.exceptions.RequestException as e:
+      raise ForkProjectError('requests error: %s' % e)
     msg = r.json()
     return r.status_code, msg
 
@@ -1485,10 +1492,11 @@ class Project(object):
       return name2.group(1)
     else:
       if type == 'pullrequest':
-      # print("remote.url: %s doesn't belong to gitee" % self.remote.url)
-        raise PullRequestError("remote.url: %s doesn't belong to gitee" % self.check_url)
+        raise PullRequestError("remote.url: %s doesn't belong to gitee" % check_url)
+      elif type == 'forkproject':
+        raise ForkProjectError("remote.url: %s doesn't belong to gitee" % check_url)
       else:
-        raise UploadError("remote.url: %s doesn't belong to gitee" % self.check_url)
+        raise UploadError("remote.url: %s doesn't belong to gitee" % check_url)
 
   def _UserUrl(self):
     token = self.manifest.manifestProject.config.GetString('repo.token')
@@ -1497,7 +1505,10 @@ class Project(object):
       if not token:
         raise UploadError('repo.token is None, Please set it, you need `repo config -h`')
     payload = {'access_token': token}
-    r = requests.get(GITEE_USER_API, params=payload, timeout=TIMEOUT)
+    try:
+      r = requests.get(GITEE_USER_API, params=payload, timeout=TIMEOUT)
+    except requests.exceptions.RequestException as e:
+      raise UploadError('requests error: %s' % e)
     if r.status_code != 200:
       raise UploadError('repo.token is Error, Please reset')
     return r.json()['html_url']
