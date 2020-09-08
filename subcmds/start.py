@@ -25,6 +25,7 @@ import gitc_utils
 from progress import Progress
 from project import SyncBuffer
 from git_config import GitConfig
+from error import ForkProjectError
 
 
 class Start(Command):
@@ -101,11 +102,14 @@ revision specified in the manifest.
       pushurl = self.manifest.manifestProject.config.GetString('repo.pushurl')
       success_msg = None
       for project in all_projects:
-        status_code, msg = project.ForkProject(token)
-        if status_code == 201:
-          fork_success_count += 1
-          if not success_msg:
-            success_msg = msg
+        try:
+          status_code, msg = project.ForkProject(token)
+          if status_code == 201:
+            fork_success_count += 1
+            if not success_msg:
+              success_msg = msg
+        except ForkProjectError:
+          continue
       if fork_success_count > 0 and pushurl is None:
         ssh_url = success_msg['ssh_url']
         pushurl = ssh_url.split('/')[0]
