@@ -1493,7 +1493,7 @@ class Project(object):
   def _GiteeNamespace(self, url=None, type='pullrequest'):
     check_url = url if url is not None else self.remote.url
     regex1 = r'^git@gitee.com:(.*?)/.*'
-    regex2 = r'^https://gitee.com/(.*?)/.*'
+    regex2 = r'^https://.*gitee.com/(.*?)/.*'
     name1 = re.match(regex1, check_url)
     name2 = re.match(regex2, check_url)
     if name1:
