@@ -21,7 +21,7 @@ import sys
 from command import InteractiveCommand
 from editor import Editor
 from error import UploadError, GitError, PullRequestError, ForkProjectError
-from project import ReviewableBranch
+from color import Coloring
 
 from pyversion import is_python3
 if not is_python3():
@@ -48,6 +48,12 @@ def _SplitUsers(values):
   for value in values:
     result.extend([s.strip() for s in value.split(',')])
   return result
+
+class PushColoring(Coloring):
+
+  def __init__(self, config):
+    Coloring.__init__(self, config, 'status')
+    self.fork = self.printer('fork', fg='green', ot='stderr')
 
 class Push(InteractiveCommand):
   common = True
@@ -247,6 +253,7 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
     self._UploadAndReport(opt, todo, peoples)
 
   def _UploadAndReport(self, opt, todo, peoples):
+    out = PushColoring(self.manifest.manifestProject.config)
     exist_regex = r'^ 已存在相同源分支.*'
     have_errors = False
     for branch in todo:
@@ -308,18 +315,19 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
           try:
               status_code, msg = branch.project.ForkProject()
               if status_code == 201:
-                  print('[FORK      OK] %-15s %s' % (
+                  hfk = out.fork
+                  fork_info = 'Remote repository is syncing code, please wait for a while'
+                  hfk('[FORK      OK] %-15s %-15s (%s) \n' % (
                          branch.project.relpath + '/',
-                         branch.name),
-                        file=sys.stderr)
+                         branch.name, fork_info))
               else:
-                  print(('[FORK  FAILED] %-15s %-15s %s') % (
+                  print(('[FORK  FAILED] %-15s %-15s (%s)') % (
                       branch.project.relpath + '/',
                       branch.name,
                       unicode(msg['message'])),
                         file=sys.stderr)
           except ForkProjectError as e:
-              print(('[FORK  FAILED] %-15s %-15s %s') % (
+              print(('[FORK  FAILED] %-15s %-15s (%s)') % (
                   branch.project.relpath + '/',
                   branch.name,
                   unicode(e)),
@@ -379,25 +387,13 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
         sys.exit(1)
 
     # if not create new branch, check whether branch has new commit.
-    if branch:
-        for project in project_list:
-          branch_tmp = branch
-          if (not opt.new_branch and
-                  project.GetUploadableBranch(branch) is None):
+    for project in project_list:
+        branch_tmp = branch if branch else project.CurrentBranch
+        if (not opt.new_branch and
+                project.GetUploadableBranch(branch_tmp) is None):
             continue
-          branch_tmp = project.GetBranch(branch_tmp)
-          if branch_tmp.LocalMerge:
-            rb = ReviewableBranch(project, branch_tmp, branch_tmp.LocalMerge)
-            pending.append((project, [rb]))
-
-    else:
-        for project in project_list:
-          if (not opt.new_branch and
-              project.GetUploadableBranch(project.CurrentBranch) is None):
-            continue
-          if project.CurrentBranch:
-            branch = project.GetBranch(project.CurrentBranch)
-            rb = ReviewableBranch(project, branch, branch.LocalMerge)
+        rb = project.GetPushableBranch(branch_tmp)
+        if rb:
             pending.append((project, [rb]))
 
     if opt.reviewers:

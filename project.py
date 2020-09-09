@@ -1352,6 +1352,16 @@ class Project(object):
       if rb.commits:
         return rb
     return None
+
+  def GetPushableBranch(self, branch_name):
+    """Get a single pushable branch, or None.
+    """
+    branch = self.GetBranch(branch_name)
+    base = branch.LocalMerge
+    if branch.LocalMerge:
+      rb = ReviewableBranch(self, branch, base)
+      return rb
+    return None
   
   def  UploadNoReview(self, opt, peoples, branch=None):
     """If not review server defined, uploads the named branch directly to git server.
