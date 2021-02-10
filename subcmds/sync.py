@@ -247,9 +247,9 @@ later is required to fix a server side protocol bug.
     p.add_option('-m', '--manifest-name',
                  dest='manifest_name',
                  help='temporary manifest to use for this sync', metavar='NAME.xml')
-    p.add_option('--clone-bundle', action='store_true',
+    p.add_option('--clone-bundle', action='store_false',
                  help='enable use of /clone.bundle on HTTP/HTTPS')
-    p.add_option('--no-clone-bundle', dest='clone_bundle', action='store_false',
+    p.add_option('--no-clone-bundle', dest='clone_bundle', action='store_true', default=True,
                  help='disable use of /clone.bundle on HTTP/HTTPS')
     p.add_option('-u', '--manifest-server-username', action='store',
                  dest='manifest_server_username',
@@ -281,7 +281,7 @@ later is required to fix a server side protocol bug.
 
     g = p.add_option_group('repo Version options')
     g.add_option('--no-repo-verify',
-                 dest='repo_verify', default=True, action='store_false',
+                 dest='repo_verify', default=False, action='store_true',
                  help='do not verify repo source code')
     g.add_option('--repo-upgraded',
                  dest='repo_upgraded', action='store_true',
