@@ -18,6 +18,7 @@ from __future__ import print_function
 import copy
 import re
 import sys
+import time
 from command import InteractiveCommand
 from editor import Editor
 from error import UploadError, GitError, PullRequestError, ForkProjectError
@@ -278,9 +279,21 @@ Gerrit Code Review:  http://code.google.com/p/gerrit/
         branch.uploaded = True
         pull_request = self.manifest.manifestProject.config.GetString('repo.pullrequest')
         if not (pull_request and pull_request == 'False') or opt.pr_force:
-            branch.have_pr = True
-            branch.pr_url = branch.project.PullRequest(opt, branch.name, peoples)
-            branch.pull_requested = True
+          branch.have_pr = True
+          branch.pull_requested = True
+          times = 3
+          while True:
+            try:
+              branch.pr_url = branch.project.PullRequest(opt, branch.name, peoples)
+              break
+            except PullRequestError as e:
+              if (times and re.search('源分支.*不存在', unicode(e))):
+                times -= 1
+                print('Created PR failed due to push hook may still execute. Retry after 2 seconds', file=sys.stderr)
+                time.sleep(2)
+                continue
+              else:
+                raise e
       except UploadError as e:
         branch.error = e
         branch.uploaded = False
