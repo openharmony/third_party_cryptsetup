@@ -74,9 +74,9 @@ import gitc_utils
 from project import Project
 from project import RemoteSpec
 from command import Command, MirrorSafeCommand
-from error import RepoChangedException, GitError, ManifestParseError
+from error import RepoChangedException, GitError, ManifestParseError, HookError
 import platform_utils
-from project import SyncBuffer
+from project import SyncBuffer, RepoHook
 from progress import Progress
 from wrapper import Wrapper
 from manifest_xml import GitcManifest
@@ -1006,6 +1006,21 @@ later is required to fix a server side protocol bug.
 
     if not opt.quiet:
       print('repo sync has finished successfully.')
+
+    passed = True
+    hook = RepoHook('post-sync', self.manifest.repo_hooks_project,
+                    self.manifest.topdir,
+                    self.manifest.manifestProject.GetRemote('origin').url,
+                    abort_if_user_denies=True)
+    try:
+      hook.Run(True)
+    except SystemExit:
+      passed = False
+    except HookError as e:
+      passed = False
+      print("ERROR: %s" % str(e), file=sys.stderr)
+    if not passed:
+      print('WARNING: The post-sync hooks failed.', file=sys.stderr)
 
 
 def _PostRepoUpgrade(manifest, quiet=False):
