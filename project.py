@@ -767,6 +767,8 @@ context['main'](**kwargs)
     orig_path = os.getcwd()
     orig_syspath = sys.path
 
+    print("\nStartExecuteHook: %s" % self._script_fullpath, file=sys.stdout)
+
     try:
       # Always run hooks with CWD as topdir.
       os.chdir(self._topdir)
@@ -1362,7 +1364,7 @@ class Project(object):
       rb = ReviewableBranch(self, branch, base)
       return rb
     return None
-  
+
   def  UploadNoReview(self, opt, peoples, branch=None):
     """If not review server defined, uploads the named branch directly to git server.
     """
@@ -1426,11 +1428,11 @@ class Project(object):
     if branch.LocalMerge and branch.LocalMerge.startswith('refs/remotes'):
       self.bare_git.UpdateRef(branch.LocalMerge,
                               R_HEADS + branch.name)
-  
+
   def PullRequest(self, opt, branch, peoples):
     """example test
-    curl -X POST --header 'Content-Type: application/json;charset=UTF-8' 
-    'https://gitee.com/api/v5/repos/MarineJ/AS-Test/pulls' 
+    curl -X POST --header 'Content-Type: application/json;charset=UTF-8'
+    'https://gitee.com/api/v5/repos/MarineJ/AS-Test/pulls'
     -d '{"access_token":"token",
     "title":"test_repo","head":"repo_test","base":"master"}'
     use remote.url to generate post_url
