@@ -271,6 +271,8 @@ later is required to fix a server side protocol bug.
                  help='number of times to retry fetches on transient errors')
     p.add_option('--prune', dest='prune', action='store_true',
                  help='delete refs that no longer exist on the remote')
+    p.add_option('--skip-hook', dest='skip_hook', action='store_true',
+                 help='skip sync hook')
     if show_smart:
       p.add_option('-s', '--smart-sync',
                    dest='smart_sync', action='store_true',
@@ -1007,20 +1009,21 @@ later is required to fix a server side protocol bug.
     if not opt.quiet:
       print('repo sync has finished successfully.')
 
-    passed = True
-    hook = RepoHook('post-sync', self.manifest.repo_hooks_project,
-                    self.manifest.topdir,
-                    self.manifest.manifestProject.GetRemote('origin').url,
-                    abort_if_user_denies=True)
-    try:
-      hook.Run(True)
-    except SystemExit:
-      passed = False
-    except HookError as e:
-      passed = False
-      print("ERROR: %s" % str(e), file=sys.stderr)
-    if not passed:
-      print('WARNING: The post-sync hooks failed.', file=sys.stderr)
+    if not opt.skip_hook:
+      passed = True
+      hook = RepoHook('post-sync', self.manifest.repo_hooks_project,
+                      self.manifest.topdir,
+                      self.manifest.manifestProject.GetRemote('origin').url,
+                      abort_if_user_denies=True)
+      try:
+        hook.Run(True)
+      except SystemExit:
+        passed = False
+      except HookError as e:
+        passed = False
+        print("ERROR: %s" % str(e), file=sys.stderr)
+      if not passed:
+        print('WARNING: The post-sync hooks failed.', file=sys.stderr)
 
 
 def _PostRepoUpgrade(manifest, quiet=False):
