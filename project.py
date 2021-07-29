@@ -1083,6 +1083,30 @@ class Project(object):
           b.published = ref_id
 
     return heads
+  def GetInfo(self):
+    result = ''
+    result += self.name
+    result += ','
+    review_url = self._format_fetch_url(self.remote.url, self.remote.review, self.name)
+    result += review_url
+    result += ','
+    result += self.revisionExpr
+    result += ','
+    result += self.remote.name
+    result += ','
+    if self.upstream:
+      result += self.upstream
+    result += ','
+    result += self.relpath
+    return  result
+  def _format_fetch_url(self, url, review, project_name):
+    if not review.startswith('http://'):
+      if not review.startswith('https://'):
+        review = 'http://' + review
+    if not review.endswith('/'):
+      review = review + '/'
+    fetch_url = review + project_name
+    return  fetch_url
 
   def MatchesGroups(self, manifest_groups):
     """Returns true if the manifest groups specified at init should cause
