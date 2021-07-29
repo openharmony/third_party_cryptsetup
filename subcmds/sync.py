@@ -249,6 +249,8 @@ later is required to fix a server side protocol bug.
                  help='temporary manifest to use for this sync', metavar='NAME.xml')
     p.add_option('--clone-bundle', action='store_false',
                  help='enable use of /clone.bundle on HTTP/HTTPS')
+    p.add_option('--statistics', dest='statistics_only', action='store_true', default=False,
+                 help='dump repo info')
     p.add_option('--no-clone-bundle', dest='clone_bundle', action='store_true', default=True,
                  help='disable use of /clone.bundle on HTTP/HTTPS')
     p.add_option('-u', '--manifest-server-username', action='store',
@@ -917,6 +919,19 @@ later is required to fix a server side protocol bug.
     err_network_sync = False
     err_update_projects = False
     err_checkout = False
+
+    # 仅获取仓库信息,不实际下载
+    if(opt.statistics_only):
+        fcsv = open('result.csv', 'w')
+        title = 'name,URL,revision,remote,upstream,path' + '\n'
+        fcsv.write(title)
+        for project in all_projects:
+            project_info = project.GetInfo()
+            project_info += "\n"
+            fcsv.write(project_info)
+        fcsv.close()
+        return
+
 
     self._fetch_times = _FetchTimes(self.manifest)
     if not opt.local_only:
