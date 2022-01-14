@@ -1,0 +1,39 @@
+{
+    "name": "@ohos/cryptsetup",
+    "version": "",
+    "description": "",
+    "homePage": "https://gitee.com/openharmony",
+    "license": "GPL-2.0",
+    "repository": "https://gitee.com/openharmony/third_party_cryptsetup",
+    "domain": "os",
+    "language": "",
+    "publishAs": "code-segment",
+    "private": false,
+    "scripts": {},
+    "tags": [
+        "third_party"
+    ],
+    "keywords": [
+        "third-party",
+        "cryptsetup"
+    ],
+    "envs": {},
+    "dirs": {},
+    "segment": {
+        "destPath": "third_party/cryptsetup"
+    },
+    "component": {
+        "name": "thirdparty_cryptsetup",
+        "subsystem": "",
+        "syscap": [],
+        "features": [],
+        "adapted_system_type": [],
+        "rom": "",
+        "ram": "",
+        "build": {
+            "sub_component": [],
+            "inner_kits": [],
+            "test": []
+        }
+    }
+}
